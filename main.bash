@@ -8,8 +8,8 @@ file=$1
 
 while read -r line; do
 
-	bash inodeScriptCommand.bash $line
-
+	bash inodeScriptFile.bash $line
+	
 	#echo ">>$line"
 
 done < "$file"

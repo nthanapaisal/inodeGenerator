@@ -151,5 +151,4 @@ fi
 Total=$(( $dataBlocks + $directBlocks + $singleBlocks + $doubleBlocks ))
 echo "Total Blocks = $Total"
 echo "--------------------------"
-
 echo "$1: $dataBlocks , $directBlocks , $singleBlocks , $doubleBlocks , $Total " >> "$file" 
