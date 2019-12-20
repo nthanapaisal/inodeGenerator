@@ -41,7 +41,7 @@ doubleBlocks=0
 divider=$(( (1024 * $kblock) / $byteaddy ))
 blockSize=$(( 1024 * $kblock ))
 
-if [[ $newsType -le $blockSize ]] ; then
+if [[ "$newsType" -le "$blockSize" ]] ; then
 	let dataBlocks=1
 	echo "$dataBlocks block of data"
 	#calculate total blocks needed not including inode
@@ -52,7 +52,20 @@ if [[ $newsType -le $blockSize ]] ; then
 fi
 
 #calculate data blocks
-let dataBlocks=$(( $newsType / $blockSize ))
+
+dataBlocks=$(( $newsType / $blockSize ))
+
+if [[ $dataBlocks -eq 12 ]] && [[ $(( $newsType % $blockSize )) -ne 0 ]] ; then
+	echo "$dataBlocks blocks of data"
+	let directBlocks=1
+	echo "$directBlocks blocks of data"
+	#calculate total blocks needed not including inode
+	Total=$(( $dataBlocks + $directBlocks + $singleBlocks + $doubleBlocks ))
+	echo "Total Blocks = $Total"
+	echo "--------------------------"
+	continue;
+
+fi
 
 #calculate blocks of direct pointer
 if [[ $dataBlocks -ge 12 ]] ; then
@@ -64,12 +77,17 @@ if [[ $dataBlocks -ge 12 ]] ; then
 	elif [[ $(( $directBlocks % $divider )) -eq 0 ]] && [[ $directBlocks -gt $divider ]] ; then
 		directBlocks=$(( $directBlocks / $divider ))
 	elif [[ $directBlocks -eq 0 ]] ; then
+		
+		#calculate total blocks needed not including inode
+		Total=$(( $dataBlocks + $directBlocks + $singleBlocks + $doubleBlocks ))
+		echo "Total Blocks = $Total"
+		echo "--------------------------"
 		continue;
 	else
 		directBlocks=1
 	fi
 	echo "$directBlocks blocks of direct pointer"
-elif [[ $dataBlocks -ge 1 ]] ; then
+elif [[ $dataBlocks -ge 1 ]] && [[ $dataBlocks -lt 12 ]] ; then
 	if [[ $newsType -gt $divider ]] && [[ $(( $newsType % $divider )) -ne 0 ]]  ; then
 		dataBlocks=$(( ($newsType / $blockSize ) + 1 ))
 	elif [[ $newsType -gt $divider ]] && [[ $(( $newsType % $divider )) -eq 0 ]] ; then
@@ -81,7 +99,7 @@ elif [[ $dataBlocks -ge 1 ]] ; then
 	#calculate total blocks needed not including inode
 	Total=$(( $dataBlocks + $directBlocks + $singleBlocks + $doubleBlocks ))
 	echo "Total Blocks = $Total"
-	echo "--------------------------"
+	echo "-------------------------"
 	continue;
 fi
 
